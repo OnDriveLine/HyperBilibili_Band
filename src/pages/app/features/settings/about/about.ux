@@ -25,6 +25,9 @@
         <div class="developer">
           <text class="text devname">@xinghengCN</text>
         </div>
+          <div class="developer">
+          <text class="text devname">@猫饼干</text>
+        </div>
       </div>
       <text class="text gr" style="margin-top: 30px">{{ $t("about.designers") }}</text>
       <div class="developers" style="margin-top: 15px">

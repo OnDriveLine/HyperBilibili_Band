@@ -7,8 +7,8 @@
   <div class="page">
     <scroll scroll-y="true" class="scroll {{scrclass}}" bounces="true">
       <title-bar title="video.title"></title-bar>
-      <online-image if="{{renderingCover}}" src="{{vid.pic}}@319w_150h" margin-top="30px" lock-size="true" width="320px"
-        height="150px" loading-anim="true" @loaded="GenBlur"></online-image>
+      <online-image if="{{renderingCover}}" src="{{vid.pic}}@300w_170h" margin-top="15px" lock-size="true" width="300px"
+        height="170px" loading-anim="true" @loaded="GenBlur" style="border-radius: 15px;"></online-image>
       <text class="vidtitle">{{ vid.title }}</text>
       <div class="statbar">
         <div class="stat">
@@ -21,7 +21,7 @@
           <text class="statext">{{ vid.owner.name }}</text>
         </div>
       </div>
-      <scroll scroll-x="true" class="vidtoolbar" style="margin-top: 25px" bounces="true">
+      <scroll scroll-x="true" class="vidtoolbar" style="margin-top: 20px" bounces="true">
         <div class="vidtool" style="margin-left: 0px" @click="LikeClick()" @longpress="PowerIt()">
           <image class="vidtoolimg" src="{{likesrc}}"></image>
           <text class="vidtooltext">{{ stat_like }}</text>
@@ -32,9 +32,7 @@
         </div>
         <div class="vidtool" @click="AddToFav()">
           <image class="vidtoolimg" src="{{starsrc}}"></image>
-          <text class="vidtooltext">
-            {{ stat_favorite }}
-          </text>
+          <text class="vidtooltext">{{ stat_favorite }}</text>
         </div>
         <div class="vidtool" @click="AISummary()">
           <image class="vidtoolimg" src="/common/vidtool_aisummary.png"></image>
@@ -45,8 +43,8 @@
           <text class="vidtooltext">{{ $t("video.showLater") }}</text>
         </div>
       </scroll>
-      <default-button text="video.sendReply" margin-top="20px" @click="Reply"></default-button>
-      <image src="/common/featurebtn_replyarea.png" style="margin-top: 15px" @click="GoReplyArea()"></image>
+      <default-button text="video.sendReply" margin-top="15px" @click="Reply"></default-button>
+      <image src="/common/featurebtn_replyarea.png" style="margin-top: 10px" @click="GoReplyArea()"></image>
     </scroll>
     <full-screen-input style="position: absolute" if="{{replymode}}" @send="SendReply"
       @exit="ExitInput"></full-screen-input>
@@ -61,7 +59,7 @@ import {kmeansCircleGradientImage} from "@src/image/jpegkmeans.ts"
 
 export default {
   public: {
-    bvid: 1 // 视频BVID
+    bvid: 1
   },
   private: {
     vid: {},
@@ -195,11 +193,6 @@ export default {
     this.UpdateVideoToolbarStatus()
   },
   async GenBlur(evt) {
-    // 该Feature在现在任何设备上运行都会卡死，故注释
-    /*
-      global.logger.log(`\n[GenBlur] 开始处理封面取色模糊`);
-      await kmeansCircleGradientImage(evt.detail.uri)
-    */
   },
   GoReplyArea() {
     router.push({

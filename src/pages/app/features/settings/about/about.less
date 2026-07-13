@@ -14,6 +14,9 @@
     .flex-row(15px 20px);
     .radius(60px);
     .center(flex-start, center);
+    width: 100%;
+    margin: 0;
+    padding: 0;
 }
 
 .logo {
@@ -32,7 +35,9 @@
     .radius(50px);
     justify-content: center;
     align-items: center;
-    width: 364px;
+    width: 100%;
+    margin: 0;
+    padding: 0;
 }
 
 .developer {
@@ -56,4 +61,33 @@
     background-color: #262626;
     justify-content: center;
     align-items: center;
+}
+
+.buildinfo-card {
+    .flex-column(12px 20px);
+    .radius(30px);
+    width: 370px;
+    background-color: #262626;
+    padding: 20px;
+}
+
+.buildinfo-row {
+    .flex-row(0px);
+    align-items: flex-start;
+    width: 100%;
+}
+
+.buildinfo-label {
+    font-size: 28px;
+    font-weight: 600;
+    color: rgba(255, 255, 255, 0.6);
+    width: 200px;
+}
+
+.buildinfo-value {
+    font-size: 28px;
+    font-weight: 600;
+    color: #ffffff;
+    flex: 1;
+    word-break: break-all;
 }
