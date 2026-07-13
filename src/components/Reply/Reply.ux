@@ -1,33 +1,33 @@
 <template>
   <div class="reply">
-    <div class="userinfo">
-      <image class="userimg" onclick="OpenUser(reply.member.mid)" style="lines: 1" src="{{reply.member.avatar}}@44w_44h" alt="/common/fullgray.png"></image>
-      <div style="flex-direction: column; justify-content: center" onclick="ShowTools(reply)">
+    <div class="userinfo" onclick="ShowTools({{reply}})">
+      <image class="userimg" style="lines: 1" src="{{reply.member.avatar}}@44w_44h" alt="/common/fullgray.png"></image>
+      <div style="flex-direction: column; justify-content: center">
         <div class="rowbar">
-          <text class="username" style="margin-left: 10px">{{ reply.member.uname }}</text>
+          <text class="username" style="margin-left: 10px; font-size: {{nameFontSize}}px;">{{ reply.member.uname }}</text>
           <image style="width: 24px; height: 14px; object-fit: contain; margin-left: 6px"
             src="/common/bililevel/lv{{reply.member.level_info.current_level}}.png"></image>
         </div>
         <div class="rowbar" style="margin-left: 10px">
-          <text class="stattext">{{ reply.reply_control.time_desc }}</text>
-          <text class="stattext" style="margin-left: 5px">{{ reply.reply_control.location }}</text>
+          <text class="stattext" style="font-size: {{statFontSize}}px;">{{ reply.reply_control.time_desc }}</text>
+          <text class="stattext" style="margin-left: 5px; font-size: {{statFontSize}}px;">{{ reply.reply_control.location }}</text>
         </div>
       </div>
     </div>
-    <div class="replycontentdiv" onclick="ShowTools(reply)">
+    <div class="replycontentdiv" onclick="ShowTools({{reply}})">
       <text class="replycontent">{{ reply.content.message }}</text>
     </div>
     <div class="bottom_bar">
-      <div class="reply_replybtn" onclick="Reply(reply.rpid)">
+      <div class="reply_replybtn" onclick="Reply({{reply.rpid}})">
         <text class="reply_replytext">回复</text>
       </div>
       <div class="replystat" style="margin-left: 25px">
         <image class="replystat_img" src="/common/replycontrol_like.png"></image>
-        <text class="replystat_count" style="margin-left: 5px">{{reply.like}}</text>
+        <text class="replystat_count" style="margin-left: 5px; font-size: {{statFontSize}}px;">{{reply.like}}</text>
       </div>
       <div class="replystat" style="margin-left: 15px" if={{!secmode}}>
         <image class="replystat_img" src="/common/replycontrol_reply.png"></image>
-        <text class="replystat_count" style="margin-left: 5px">{{reply.rcount}}</text>
+        <text class="replystat_count" style="margin-left: 5px; font-size: {{statFontSize}}px;">{{reply.rcount}}</text>
       </div>
     </div>
   </div>
@@ -37,14 +37,6 @@
 import router from "@system.router"
 export default {
   props: ["reply", "secmode"],
-  OpenUser(id) {
-    router.push({
-      uri: "pages/user",
-      params: {
-        uid: id
-      }
-    })
-  },
   ShowTools(reply) {
     this.$emit("showTools", {
       reply: reply
@@ -62,74 +54,63 @@ export default {
 @import '@less/global.less';
 
 .reply {
-  width: 319px;
-  height: 200px;
-  border-radius: 25px;
   background-color: #262626;
   flex-direction: column;
+  padding-bottom: 8px;
 }
 
 .userinfo {
   flex-direction: row;
   align-items: center;
-  margin-left: 25px;
-  margin-top: 17px;
+  margin-left: 10px;
+  margin-top: 10px;
 }
 
 .userimg {
-  width: 44px;
-  height: 44px;
+  width: 36px;
+  height: 36px;
   border-radius: 50%;
 }
 
 .username {
-  font-size: 20px;
   font-weight: 600;
-  max-width: 160px;
+  width: 160px;
   max-height: 25px;
+  text-overflow: ellipsis;
 }
 
 .replycontentdiv {
-  width: 253px;
-  height: 82px;
-  max-height: 82px;
-  display: flex;
-  flex-direction: column;
-  margin-top: 7px;
-  margin-left: 33px;
-  justify-content: flex-start; /* 保证内容顶部对齐 */
+  margin-top: 5px;
 }
 
 .replycontent {
-  width: 336px;
+  width: 100%;
   font-size: 20px;
   font-weight: 600;
-  text-overflow: ellipsis;
+  color: #ffffff;
 }
 
 .reply_replybtn {
   background-color: #343434;
-  width: 88px;
-  height: 34px;
+  width: 70px;
+  height: 28px;
   border-radius: 10px;
   align-items: center;
   justify-content: center;
-  margin-top: 5px;
-  margin-left: 33px;
+  margin-top: 3px;
 }
 
 .reply_replytext {
-  font-size: 18px;
   font-weight: 600;
 }
 
 .bottom_bar {
   flex-direction: row;
   align-items: center;
+  margin-top: 3px;
 }
 
 .stattext {
-  font-size: 14px;
   color: rgb(136, 136, 136);
 }
 
@@ -140,17 +121,16 @@ export default {
 
 .replystat {
   flex-direction: row;
-  height: 480px;
+  height: 100%;
   align-items: center;
 }
 
 .replystat_count {
-  font-size: 16px;
   font-weight: 600;
 }
 
 .replystat_img {
-  width: 22px;
-  height: 23px;
+  width: 18px;
+  height: 19px;
 }
 </style>
