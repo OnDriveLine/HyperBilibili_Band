@@ -1,0 +1,93 @@
+@import '@less/defs.less';
+@import '@less/color.less';
+
+.text {
+    .font-size(35px);
+    .font-semibold();
+}
+
+.gr {
+    color: rgba(255, 255, 255, 0.6);
+}
+
+.appbar {
+    .flex-row(15px 20px);
+    .radius(60px);
+    .center(flex-start, center);
+    width: 100%;
+    margin: 0;
+    padding: 0;
+}
+
+.logo {
+    .radius(50%);
+    .w(60px);
+    .h(60px);
+}
+
+.ver {
+    color: #9e9e9e;
+    margin-left: 15px;
+}
+
+.developers {
+    .flex-column(15px 10px);
+    .radius(50px);
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    margin: 0;
+    padding: 0;
+}
+
+.developer {
+    .flex-row(0px, #00000000);
+}
+
+.img {
+    .w(52px);
+    .h(53px);
+    object-fit: none;
+}
+
+.devname {
+    padding-left: 22px;
+}
+
+.disclaimer-btn {
+    .flex-column(15px 40px);
+    .radius(90px);
+    width: 270px;
+    background-color: #262626;
+    justify-content: center;
+    align-items: center;
+}
+
+.buildinfo-card {
+    .flex-column(12px 20px);
+    .radius(30px);
+    width: 370px;
+    background-color: #262626;
+    padding: 20px;
+}
+
+.buildinfo-row {
+    .flex-row(0px);
+    align-items: flex-start;
+    width: 100%;
+}
+
+.buildinfo-label {
+    font-size: 28px;
+    font-weight: 600;
+    color: rgba(255, 255, 255, 0.6);
+    width: 200px;
+}
+
+.buildinfo-value {
+    font-size: 28px;
+    font-weight: 600;
+    color: #ffffff;
+    flex: 1;
+    word-break: break-all;
+}

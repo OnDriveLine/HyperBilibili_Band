@@ -1,16 +1,18 @@
 {
-  "name": "HyperBilibili",
+  "name": "hyper-bilibili",
   "version": "1.0.0",
   "description": "",
   "engines": {
-    "node": ">=8.10"
+    "yarn": ">=1.22.0"
   },
+  "license": "GPL-3.0-only",
   "scripts": {
-    "start": "aiot server --watch --open-nuttx --enable-custom-component true --enable-protobuf true",
-    "build": "aiot build --enable-custom-component --enable-jsc --enable-protobuf",
-    "release": "aiot release --enable-custom-component --enable-jsc --enable-protobuf",
+    "start": "aiot server --watch --open-nuttx",
+    "build": "aiot build --enable-jsc",
+    "release": "aiot release --enable-jsc",
     "watch": "aiot watch --open-nuttx",
-    "lint": "eslint --format codeframe --fix --ext .ux,.js src/"
+    "lint": "eslint --format codeframe --fix --ext .ux,.js src/",
+    "postinstall": "node -e \"if (process.env.npm_execpath && !process.env.npm_execpath.includes('yarn')) { console.error('Please use Yarn to install dependencies!'); process.exit(1); }\""
   },
   "lint-staged": {
     "*.{ux,js}": [
@@ -25,31 +27,33 @@
     ]
   },
   "devDependencies": {
-    "@aiot-toolkit/jsc": "^1.0.3",
-    "@aiot-toolkit/velasim": "^0.1.26-beta.3",
-    "@commitlint/cli": "^17.3.0",
-    "@commitlint/config-conventional": "^17.3.0",
-    "aiot-toolkit": "1.1.3",
+    "@aiot-toolkit/jsc": "^1.0.7",
+    "@commitlint/cli": "^19.6.1",
+    "@commitlint/config-conventional": "^19.6.0",
+    "aiot-toolkit": "2.0.4-beta.3",
     "babel-eslint": "^10.0.1",
-    "eslint": "^6.0.0",
-    "eslint-config-prettier": "^6.0.0",
+    "eslint": "^9.18.0",
+    "eslint-config-prettier": "^10.0.1",
     "eslint-import-resolver-node": "^0.3.7",
     "eslint-plugin-import": "^2.27.5",
-    "eslint-plugin-prettier": "^3.4.0",
+    "eslint-plugin-prettier": "^5.2.3",
     "eslint-plugin-ux": "^0.0.4",
-    "husky": "^8.0.1",
-    "less": "^3.12.2",
-    "less-loader": "^6.2.0",
-    "lint-staged": "^8.2.1",
-    "postcss-html": "^1.3.0",
+    "husky": "^9.1.7",
+    "less": "^4.2.2",
+    "less-loader": "^12.2.0",
+    "lint-staged": "^15.4.1",
+    "postcss-html": "^1.8.0",
     "postcss-less": "^6.0.0",
-    "prettier": "^2.7.1",
-    "stylelint": "^14.5.3",
-    "stylelint-config-recess-order": "^3.0.0",
-    "stylelint-config-standard": "^25.0.0",
-    "stylelint-order": "^5.0.0",
-    "ts-loader": "^9.5.1",
-    "typescript": "^5.5.3",
+    "prettier": "^3.4.2",
+    "stylelint": "^16.13.2",
+    "stylelint-config-recess-order": "^6.0.0",
+    "stylelint-config-standard": "^37.0.0",
+    "stylelint-order": "^6.0.4",
     "ux-types": "^0.1.1"
+  },
+  "dependencies": {
+    "dayjs": "^1.11.13",
+    "jpeg-js": "^0.4.4",
+    "semver": "^7.6.3"
   }
 }

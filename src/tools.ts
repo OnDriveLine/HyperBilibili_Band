@@ -1,7 +1,6 @@
-import { device } from "./tsimports"
+import { device, network, router } from "./tsimports"
 
 export function formatNumber(num: number): string {
-    console.log("formatNumber: " + num)
     if (num < 1000) {
         return num.toString();
     }
@@ -37,5 +36,41 @@ export function getDeviceInformation(): Promise<any> {
                 reject(error);
             }
         });
+    });
+}
+
+export function getDeviceSerial(): Promise<any> {
+    return new Promise((resolve, reject) => {
+        device.getSerial({
+            success: (data) => {
+                resolve(data.serial);
+            },
+            fail: (error) => {
+                router.clear();
+                router.replace({
+                    uri: "pages/error/permissionerror"
+                });
+                reject(error);
+            }
+        });
+    });
+}
+
+export function getNetworkType(): Promise<any> {
+    return new Promise((resolve, reject) => {
+        network.getType({
+            success: (data) => {
+                resolve(data.type);
+            },
+            fail: (error) => {
+                reject(error);
+            }
+        });
+    });
+}
+
+export function unicodeToString(unicodeStr) {
+    return unicodeStr.replace(/\\u([\dA-F]{4})/gi, function (match, grp) {
+        return String.fromCharCode(parseInt(grp, 16));
     });
 }

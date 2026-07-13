@@ -1,0 +1,84 @@
+<import name="title-bar" src="@components/TitleBar/TitleBar.ux"></import>
+
+<template>
+    <div class="page">
+        <scroll scroll-y="true" class="scroll {{scrclass}}" bounces="true">
+            <title-bar title={{titletext}}></title-bar>
+            <div style="background-color: #262626; width: {{cardWidth}}px; border-radius: {{cardRadius}}px; padding: {{cardPadding}}px; flex-direction: column; align-items: flex-start;">
+                <text for="{{textLines}}" style="font-size: {{textFontSize}}px; font-weight: 600; color: #ffffff; width: {{textContentWidth}}px; margin-top: 2px;">{{$item}}</text>
+            </div>
+            <text style="margin-top: 25px"></text>
+        </scroll>
+    </div>
+</template>
+
+<script>
+export default {
+    public: {
+        text: "",
+        titletext: "详情"
+    },
+    private: {
+        textLines: [],
+        cardWidth: 330,
+        cardRadius: 25,
+        cardPadding: 15,
+        textFontSize: 22,
+        textContentWidth: 300,
+        scrclass: ""
+    },
+    onInit() {
+        this.doStyleAdjustTask()
+        this.splitText()
+    },
+    splitText() {
+        if (!this.text) {
+            this.textLines = []
+            return
+        }
+        // 按换行符拆分，每行作为一个独立的 text 元素
+        this.textLines = this.text.split('\n')
+    },
+    doStyleAdjustTask() {
+        const deviceInfo = global.DEVICE_INFO
+        if (!deviceInfo) return
+
+        // 336x480 屏幕
+        if (deviceInfo.screenWidth <= 340) {
+            this.cardWidth = 310
+            this.cardRadius = 25
+            this.cardPadding = 12
+            this.textFontSize = 20
+            this.textContentWidth = 286
+        }
+        // Band Pro 系列（380px左右）
+        else if (deviceInfo.screenWidth <= 380) {
+            this.cardWidth = 340
+            this.cardRadius = 28
+            this.cardPadding = 15
+            this.textFontSize = 22
+            this.textContentWidth = 310
+        }
+        // RW系列（中屏）
+        else if (deviceInfo.screenShape == "rect") {
+            this.cardWidth = 370
+            this.cardRadius = 30
+            this.cardPadding = 20
+            this.textFontSize = 28
+            this.textContentWidth = 330
+        }
+        // 圆屏系列
+        else {
+            this.cardWidth = 300
+            this.cardRadius = 25
+            this.cardPadding = 15
+            this.textFontSize = 22
+            this.textContentWidth = 270
+        }
+    }
+}
+</script>
+
+<style lang="less">
+@import '@less/global.less';
+</style>
