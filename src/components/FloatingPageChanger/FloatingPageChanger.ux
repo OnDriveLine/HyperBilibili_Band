@@ -31,9 +31,7 @@ NextPN() {
 }
 </script>
 
-<style lang="less">
-@import '@less/global.less';
-
+<style>
 .pagechanger-container {
 bottom: 22px;
 position: absolute;

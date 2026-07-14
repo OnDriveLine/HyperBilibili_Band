@@ -1,19 +1,41 @@
 <template>
+<<<<<<< HEAD
   <!-- template里只能有一个根节点 -->
   <div class="demo-page">
     <text class="title">{{text}}</text>
+=======
+  <div class="page">
+    <text>等待连接手机</text>
+>>>>>>> parent of 8a367ce (Updated 2.5 some updating)
   </div>
 </template>
 
 <script>
 export default {
+<<<<<<< HEAD
   private: {
     text: '欢迎打开详情页'
   }
+=======
+    private: {
+        checktimer: null
+    },
+    onInit(){
+        this.checktimer = setInterval(() => {
+            if(this.$app.$def.interconnecter.CONNECTION_OPEN){
+                this.$app.$def.jumpcheck.Jump()
+            }
+        }, 1000)
+    },
+    onDestroy(){
+        clearInterval(this.checktimer)
+    }
+>>>>>>> parent of 8a367ce (Updated 2.5 some updating)
 }
 </script>
 
 <style>
+<<<<<<< HEAD
   .demo-page {
     flex-direction: column;
     justify-content: center;
@@ -25,3 +47,15 @@ export default {
     text-align: center;
   }
 </style>
+=======
+.page {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  position: absolute;
+  width: 100%;
+}
+</style>
+>>>>>>> parent of 8a367ce (Updated 2.5 some updating)

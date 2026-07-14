@@ -34,7 +34,6 @@
 </template>
 
 <script>
-import router from "@system.router"
 export default {
   props: ["reply", "secmode"],
   ShowTools(reply) {
@@ -50,9 +49,7 @@ export default {
 }
 </script>
 
-<style lang="less">
-@import '@less/global.less';
-
+<style>
 .reply {
   background-color: #262626;
   flex-direction: column;

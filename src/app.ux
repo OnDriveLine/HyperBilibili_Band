@@ -1,61 +1,26 @@
 <script>
-// third-party deps
-import dayjs from "dayjs"
-
-// local imports
-import * as animengine from "./animation/engine"
-import { BilibiliClient }  from "./bilibiliclient/client"
+import * as animengine from "./animengine"
+import { BilibiliClient }  from "./bilibiliclient"
 import * as tools from "./tools"
-import * as articletools from "./articletools"
 import * as funnytips from "./funnytips"
 import * as settings from "./settings"
+import * as ambientlight from "./ambientlight"
 import * as jumpcheck from "./jumpcheck"
-import * as htmlparser from "./htmlparser"
-import * as savedcontent from "./savedcontent"
-import * as bgimg from "./bgimg"
-import * as usertracker from "./usertracker"
-import logger from "./logger/logger"
-import * as ui from "./ui/ui"
+import * as interconnecter from "./interconnecter"
 export default {
-  dayjs: dayjs,
+  animengine: animengine,
+  biliclient: null,
   tools: tools,
   funnytips: funnytips,
+  settings: settings,
+  ambientlight: ambientlight,
   jumpcheck: jumpcheck,
-  articletools: articletools,
-  htmlparser: htmlparser,
-  bgimg: bgimg,
-  async onCreate() {
+  interconnecter: interconnecter,
+  onCreate() {
     console.log("app created")
-
-    console.log("create global logger")
-    global.logger = logger
-
-    console.log("create custom ui engine")
-    global.ui = ui
-    global.ui.Init()
-
-    console.log("create global animengine")
-    global.animengine = animengine
-
-    console.log("appinit > loadSettings")
     settings.loadSettings()
-    global.settings = settings
-
-    console.log("appinit > initSavedContentManager")
-    await savedcontent.SavedContentManager.initialize()
-    global.savedcontent = savedcontent
-
-    console.log("appinit > initDeviceInfo")
-    global.DEVICE_INFO = await tools.getDeviceInformation()
-    global.DEVICE_SERIAL = await tools.getDeviceSerial()
-    global.DEVICE_NETWORK_TYPE = await tools.getNetworkType()
-
-    console.log("appinit > initBgImg")
-    this.bgimg.Init()
-    global.bgimg = this.bgimg
-
-    console.log("appinit > createBiliClient")
-    global.biliclient = new BilibiliClient()
+    
+    this.biliclient = new BilibiliClient(this.settings.SETTINGS.enableInterconnectMode, this.interconnecter)
   },
   onDestroy() {
     console.log("app destroyed")
