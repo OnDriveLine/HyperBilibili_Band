@@ -51,38 +51,40 @@ export default {
       params: {bvid}
     })
   },
-  // 在线图片展示大小（UI层）
   SetOnlineImageSize(width, height) {
     this.vidpicture_style["width"] = width + "px"
     this.vidpicture_style["height"] = height + "px"
   },
-  // 在线图片加载大小（组件层）
-  // 使用比展示大小更小的加载大小可以节省设备RAM、降低渲染压力、节省流量等
-  // 推荐是展示大小的等比例缩放
   SetOnlineImageLoadSize(width, height) {
     this.onlineimg_width = width
     this.onlineimg_height = height
   },
   doStyleAdjustTask() {
     const deviceInfo = global.DEVICE_INFO
-    if (deviceInfo.screenShape == "rect" || this.video.title.length > 25) {
-      this.useColumnTitle = true
-      // 手环Pro 系列
-      if (deviceInfo.screenWidth <= 380) {
-        this.SetOnlineImageSize(200, 150)
-        this.SetOnlineImageLoadSize(100, 75)
-      }
-      // RW系列
-      else if (deviceInfo.screenShape == "rect") {
-        this.SetOnlineImageSize(265, 150)
-        this.SetOnlineImageLoadSize(265, 150)
-      }
-      // 圆屏系列
-      else {
-        this.SetOnlineImageSize(300, 150)
-        this.SetOnlineImageLoadSize(300, 150)
-      }
-    }
+    const screenW = deviceInfo.screenWidth
+    const screenH = deviceInfo.screenHeight
+
+    const cardPadding = 30
+    const availW = screenW - cardPadding
+
+    const isRound = deviceInfo.screenShape !== "rect"
+    const maxImgH = isRound
+      ? Math.floor(screenH * 0.4)
+      : Math.floor(screenH * 0.5)
+
+    const ratio16x9 = Math.floor(availW * 9 / 16)
+    const imgH = Math.min(ratio16x9, maxImgH)
+    const imgW = availW
+
+    const loadW = Math.floor(imgW * 0.85)
+    const loadH = Math.floor(imgH * 0.85)
+
+    this.useColumnTitle = true
+
+    this.SetOnlineImageSize(imgW, imgH)
+    this.SetOnlineImageLoadSize(loadW, loadH)
+
+    this.vidinfo_style = { width: imgW + 'px' }
   },
   doVidObjectPatch() {
     if (!(this.video.pic.includes("http://") || this.video.pic.includes("https://"))) {
@@ -93,9 +95,7 @@ export default {
     if (!this.video) {
       this.video = await global.biliclient.getVideoInfoByBVID(this.bvid)
     }
-
     this.loadComp = true
-
     this.doVidObjectPatch()
     this.doStyleAdjustTask()
   },
@@ -127,7 +127,8 @@ export default {
 .vidinfo {
   width: 306px;
   justify-content: center;
-  flex-direction: row;
+  align-items: center;
+  flex-direction: column;
 }
 
 .vidpicture {
@@ -155,6 +156,7 @@ export default {
   font-size: 20px;
   font-weight: 600;
   text-overflow: ellipsis;
+  lines: 2;
 }
 
 .vidstat {

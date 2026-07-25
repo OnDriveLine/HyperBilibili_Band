@@ -15,7 +15,7 @@ import { BilibiliClientDynamicMethods } from './dynamic/dynamic';
 
 class BilibiliClient {
     // 版本号
-    public version: string = "2.5";
+    public version: string = "2.6";
 
     // Fetch API
     // 在class内存储一个来适配不同实现

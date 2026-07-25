@@ -2,31 +2,82 @@
 @import '@less/color.less';
 
 .cleartip {
-    font-size: 35px;
+    font-size: 28px;
     font-weight: 600;
     color: #9E9E9E;
 }
 
 .typebox {
-    .radius(30px);
-    .flex-column(10px);
+    .radius(25px);
+    overflow: hidden;
+    width: 340px;
+    background-color: #2a2a2a;
+    flex-direction: column;
 }
 
 .tmptype {
-    .flex-row(10px 15px, #434343);
-    .radius(20px);
-    width: 336px;
+    padding: 12px 16px;
     justify-content: space-between;
     align-items: center;
+    flex-direction: row;
 }
 
 .typetxt {
     font-weight: 600;
-    font-size: 30px;
+    font-size: 24px;
+    color: #ffffff;
+    flex-shrink: 0;
 }
 
 .typesize {
     font-weight: 600;
-    font-size: 30px;
-    color: gray;
+    font-size: 24px;
+    color: #FF7DA8;
+}
+
+// 缓存内容行内确认
+.sc-confirm {
+    width: 340px;
+    margin-top: 10px;
+    padding: 12px 16px;
+    background-color: #1e1e1e;
+    .radius(20px);
+    flex-direction: column;
+    align-items: center;
+}
+
+.sc-confirm-text {
+    font-size: 22px;
+    color: #cccccc;
+    text-align: center;
+    margin-bottom: 12px;
+    lines: 2;
+}
+
+.sc-confirm-btns {
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+}
+
+.sc-btn {
+    padding: 8px 24px;
+    .radius(16px);
+    margin: 0 8px;
+    justify-content: center;
+    align-items: center;
+}
+
+.sc-btn-cancel {
+    background-color: #4a4a4a;
+}
+
+.sc-btn-ok {
+    background-color: #4A90D9;
+}
+
+.sc-btn-txt {
+    font-size: 22px;
+    color: #ffffff;
+    font-weight: 600;
 }

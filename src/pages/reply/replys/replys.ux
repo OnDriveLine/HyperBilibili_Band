@@ -13,7 +13,7 @@
       <image style="position: absolute; margin-top: 245px" if="{{anims.show_loading}}" src="{{anims.loading_src.value}}"></image>
       <list class="replylist">
         <list-item type="replies"
-          style="width: 336px; justify-content: center; margin-top: 5px; height: 150px;"
+          style="width: 336px; justify-content: center; margin-top: 8px; height: 200px;"
           for="{{replies}}">
           <reply secmode={{secmode}} reply="{{$item}}" @show-tools="ShowTools" @reply="Reply"></reply>
         </list-item>

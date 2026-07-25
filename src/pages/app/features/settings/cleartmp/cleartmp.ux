@@ -11,15 +11,26 @@
         <text if="{{tmps.length < 1}}" style="font-weight: 600; font-size: 24px; color: #9e9e9e">
           缓存文件扫描中...
         </text>
-        <div style="padding: 5px; width: 259px" for="{{tmps}}">
-          <div class="tmptype" onclick="SelectHandler($item.alias)" style="background-color: {{typeColors[$item.alias]}}">
-            <text class="typetxt">{{ $item.name }}</text>
-            <text class="typesize">{{ $item.size }}</text>
+        <div class="tmptype" for="{{tmps}}" onclick="SelectHandler($idx)" style="background-color: {{$item.selected ? '#3a3a3a' : 'transparent'}}">
+          <text class="typetxt">{{ $item.name }}</text>
+          <text class="typesize">{{ $item.size }}</text>
+        </div>
+      </div>
+
+      <!-- 缓存内容行内确认 -->
+      <div class="sc-confirm" if="{{showScConfirm}}">
+        <text class="sc-confirm-text">将清除专栏、音频等缓存，不可逆</text>
+        <div class="sc-confirm-btns">
+          <div class="sc-btn sc-btn-cancel" onclick="ScCancel">
+            <text class="sc-btn-txt">取消</text>
+          </div>
+          <div class="sc-btn sc-btn-ok" onclick="ScConfirm">
+            <text class="sc-btn-txt">确定</text>
           </div>
         </div>
       </div>
-      <default-button @click="ClearClick" primary="true" margin-top="25px" text="cleartmp.clear"
-        disabled="{{cantClear}}"></default-button>
+
+      <default-button @click="ClearClick" primary="true" margin-top="25px" text="cleartmp.clear"></default-button>
       <text style="margin-top: 30px"></text>
     </scroll>
   </div>
@@ -29,196 +40,240 @@
 import prompt from "@system.prompt"
 import {asyncFile} from "../../../../../asyncapi/file"
 
+const FileOps = {
+  extractFileList(result) {
+    if (!result) return []
+    if (Array.isArray(result)) return result
+    if (Array.isArray(result.fileList)) return result.fileList
+    if (Array.isArray(result.files)) return result.files
+    if (typeof result === "object") {
+      for (const key of Object.keys(result)) {
+        if (Array.isArray(result[key])) return result[key]
+      }
+    }
+    return []
+  },
+  extractFileInfo(file) {
+    const uri = file.uri || file.path || file.name || file.filePath || file.fileUri || ""
+    const size = file.length || file.size || file.fileSize || 0
+    return {uri, size}
+  },
+  toAbsoluteUri(uri, basePath) {
+    if (!uri) return ""
+    if (uri.startsWith("internal://")) return uri
+    if (uri.includes("://")) return uri
+    const base = basePath.endsWith("/") ? basePath : basePath + "/"
+    return base + uri
+  },
+  async tryDelete(uri) {
+    if (!uri) return false
+    const candidates = [uri]
+    if (!uri.startsWith("internal://")) {
+      candidates.push("internal://files/" + uri)
+      candidates.push("internal://cache/" + uri)
+    }
+    if (uri.startsWith("internal://files/")) {
+      candidates.push(uri.replace("internal://files/", ""))
+    }
+    if (uri.startsWith("internal://cache/")) {
+      candidates.push(uri.replace("internal://cache/", ""))
+    }
+    for (const tryUri of candidates) {
+      try {
+        await asyncFile.delete({uri: tryUri})
+        return true
+      } catch (e) {}
+    }
+    return false
+  },
+  async tryGet(uri) {
+    if (!uri) return null
+    const candidates = [uri]
+    if (!uri.startsWith("internal://")) {
+      candidates.push("internal://files/" + uri)
+      candidates.push("internal://cache/" + uri)
+    }
+    if (uri.startsWith("internal://files/")) {
+      candidates.push(uri.replace("internal://files/", ""))
+    }
+    for (const tryUri of candidates) {
+      try {
+        const data = await asyncFile.get({uri: tryUri})
+        if (data) return {uri: tryUri, data}
+      } catch (e) {}
+    }
+    return null
+  },
+  async list(dirUri) {
+    try {
+      const result = await asyncFile.list({uri: dirUri})
+      const files = this.extractFileList(result)
+      return files.map((f) => {
+        const info = this.extractFileInfo(f)
+        info.uri = this.toAbsoluteUri(info.uri, dirUri)
+        return info
+      })
+    } catch (e) {
+      return []
+    }
+  }
+}
+
 export default {
   private: {
     tmps: [],
-    cantClear: true,
-    clearControl: {
-      imgs: false,
-      logs: false,
-      sc: false
-    },
-    typeColors: {
-      imgs: "#434343",
-      logs: "#434343",
-      sc: "#434343",
-      others: "#222222"
-    },
+    showScConfirm: false,
     scrclass: ""
   },
-  RefreshPage() {
-    this.cantClear = true
-    this.clearControl = {
-      imgs: false,
-      logs: false,
-      sc: false
+  ForceUpdate() {
+    this.tmps.splice(this.tmps.length, 0)
+  },
+  SelectHandler(idx) {
+    const item = this.tmps[idx]
+    if (!item) return
+    if (item.alias === "sc" && !item.selected) {
+      this.showScConfirm = true
+      return
     }
-    this.typeColors = {
-      imgs: "#434343",
-      logs: "#434343",
-      sc: "#434343",
-      others: "#222222"
+    this.tmps[idx].selected = !this.tmps[idx].selected
+    this.ForceUpdate()
+  },
+  ScConfirm() {
+    this.showScConfirm = false
+    for (let i = 0; i < this.tmps.length; i++) {
+      if (this.tmps[i].alias === "sc") {
+        this.tmps[i].selected = true
+        break
+      }
     }
+    this.ForceUpdate()
+  },
+  ScCancel() {
+    this.showScConfirm = false
+  },
+  async BatchDelete(uriList) {
+    if (!uriList || uriList.length === 0) return 0
+    let success = 0
+    const tasks = uriList.map(async (uri) => {
+      const ok = await FileOps.tryDelete(uri)
+      if (ok) success++
+    })
+    await Promise.all(tasks)
+    return success
   },
   async ClearClick() {
-    const tasks = []
-
-    if (this.clearControl.imgs) {
-      const imgTemp = this.tmps.find((t) => t.alias === "imgs")
-      if (imgTemp) {
-        imgTemp.list.forEach((uri) => {
-          tasks.push(asyncFile.delete({uri}))
-        })
+    let hasSelected = false
+    for (let i = 0; i < this.tmps.length; i++) {
+      if (this.tmps[i].selected) {
+        hasSelected = true
+        break
       }
     }
-
-    if (this.clearControl.logs) {
-      const logTemp = this.tmps.find((t) => t.alias === "logs")
-      if (logTemp) {
-        logTemp.list.forEach((uri) => {
-          tasks.push(asyncFile.delete({uri}))
-        })
-      }
+    if (!hasSelected) {
+      prompt.showToast({message: "请先选择要清理的类别"})
+      return
     }
 
-    if (this.clearControl.sc) {
-      const contents = await global.savedcontent.SavedContentManager.listAllContent()
-      contents.forEach((ct) => {
-        tasks.push(global.savedcontent.SavedContentManager.deleteContent(ct.id))
-      })
-    }
-
-    await Promise.all(tasks)
-
-    prompt.showToast({
-      message: "清理完毕"
-    })
-
-    this.ScanTemps()
-    this.RefreshPage()
-  },
-  SelectHandler(name) {
-    switch (name) {
-      case "imgs":
-        this.clearControl.imgs = !this.clearControl.imgs
-        this.typeColors.imgs = this.clearControl.imgs ? "#FF7DA8" : "#434343"
-        break
-      case "logs":
-        this.clearControl.logs = !this.clearControl.logs
-        this.typeColors.logs = this.clearControl.logs ? "#FF7DA8" : "#434343"
-        break
-      case "sc":
-        if (!this.clearControl.sc) {
-          prompt.showDialog({
-            message:
-              "清除缓存内容即意味着清除您之前缓存的专栏、音频等内容，且该操作不可逆。确定要继续吗？",
-            success: (data) => {
-              this.clearControl.sc = true
-              this.typeColors.sc = this.clearControl.sc ? "#FF7DA8" : "#434343"
-              // 由于这是异步函数，因此需要重新做cantClear检测
-              this.cantClear = !(
-                this.clearControl.imgs ||
-                this.clearControl.logs ||
-                this.clearControl.sc
-              )
+    let deletedCount = 0
+    for (let i = 0; i < this.tmps.length; i++) {
+      const item = this.tmps[i]
+      if (item.selected && item.list) {
+        if (item.alias === "sc") {
+          try {
+            const contents = await global.savedcontent.SavedContentManager.listAllContent()
+            for (const ct of contents) {
+              try {
+                await global.savedcontent.SavedContentManager.deleteContent(ct.id)
+                deletedCount++
+              } catch (e) {
+                const fileUri = ct.fileUri || ct.uri || ct.path
+                if (fileUri && await FileOps.tryDelete(fileUri)) deletedCount++
+              }
             }
-          })
+          } catch (e) {}
         } else {
-          this.clearControl.sc = false
-          this.typeColors.sc = this.clearControl.sc ? "#FF7DA8" : "#434343"
+          deletedCount += await this.BatchDelete(item.list)
         }
-        break
+      }
     }
-
-    this.cantClear = !(this.clearControl.imgs || this.clearControl.logs || this.clearControl.sc)
-    global.logger.log("[ClearTmp.SelectHandler] cantClear: ", this.cantClear)
+    prompt.showToast({
+      message: deletedCount > 0 ? "清理完毕，共清理 " + deletedCount + " 个文件" : "清理完毕"
+    })
+    this.ScanTemps()
   },
   BytesToMB(bytes) {
     return (bytes / (1024 * 1024)).toFixed(2)
   },
-  async getSavedContentList() {
+  async getSavedContentFiles() {
     try {
       const contents = await global.savedcontent.SavedContentManager.listAllContent()
-      const ret = await Promise.all(
-        contents.map(async (content) => {
-          const data = await asyncFile.get({uri: content.fileUri})
-          return {
-            uri: content.fileUri,
-            length: data.length,
-            _labelIsSavedContent: true
-          }
-        })
-      )
-      return ret
+      if (!contents || contents.length === 0) return []
+      const results = []
+      for (const content of contents) {
+        const fileUri = content.fileUri || content.uri || content.path
+        if (!fileUri) continue
+        const result = await FileOps.tryGet(fileUri)
+        if (result) {
+          results.push({uri: result.uri, size: result.data.length || result.data.size || 0})
+        }
+      }
+      return results
     } catch (e) {
-      global.logger.error("在扫描临时文件（统计缓存内容）时出错：", e.toString())
+      return []
     }
   },
   async ScanTemps() {
     try {
-      // 准备统计对象
-      const totalStats = {
-        images: {count: 0, size: 0, list: []},
-        logs: {count: 0, size: 0, list: []},
-        savedContent: {count: 0, size: 0},
-        others: {count: 0, size: 0}
+      const stats = {
+        images: {size: 0, list: []},
+        logs: {size: 0, list: []},
+        savedContent: {size: 0, list: []},
+        others: {size: 0, list: []}
       }
-
-      // 并行获取文件列表
-      const [rootFiles, logFiles, savedContentFiles] = await Promise.all([
-        asyncFile.list({uri: "internal://files/"}),
-        asyncFile.list({uri: "internal://files/logs"}),
-        this.getSavedContentList()
+      const [rootFiles, logFiles, scFiles] = await Promise.all([
+        FileOps.list("internal://files/"),
+        FileOps.list("internal://files/logs"),
+        this.getSavedContentFiles()
       ])
-
-      const fileList = [...rootFiles.fileList, ...logFiles.fileList, ...savedContentFiles]
-
-      for (const file of fileList) {
-        const {uri, length, _labelIsSavedContent} = file
-
-        if (/\.(jpg|png|avif|gif)/i.test(uri)) {
-          totalStats.images.count++
-          totalStats.images.size += length
-          totalStats.images.list.push(uri)
-        } else if (/\.log$/i.test(uri)) {
-          totalStats.logs.count++
-          totalStats.logs.size += length
-          totalStats.logs.list.push(uri)
-        } else if (_labelIsSavedContent) {
-          totalStats.savedContent.count++
-          totalStats.savedContent.size += length
-        } else {
-          totalStats.others.count++
-          totalStats.others.size += length
+      const scUris = new Set()
+      for (const f of scFiles) {
+        if (f.uri) {
+          scUris.add(f.uri)
+          stats.savedContent.size += f.size
+          stats.savedContent.list.push(f.uri)
         }
       }
-
-      this.tmps = [
-        {
-          name: "临时图片",
-          alias: "imgs",
-          size: `${this.BytesToMB(totalStats.images.size)} MB`,
-          list: totalStats.images.list
-        },
-        {
-          name: "日志文件",
-          alias: "logs",
-          size: `${this.BytesToMB(totalStats.logs.size)} MB`,
-          list: totalStats.logs.list
-        },
-        {
-          name: "缓存内容",
-          alias: "sc",
-          size: `${this.BytesToMB(totalStats.savedContent.size)} MB`
-        },
-        {
-          name: "其它",
-          alias: "others",
-          size: `${this.BytesToMB(totalStats.others.size)} MB`
+      for (const f of rootFiles) {
+        if (!f.uri || scUris.has(f.uri)) continue
+        if (/\.(jpg|jpeg|png|avif|gif|webp|bmp|svg|tiff|tif|ico|heic|heif|jfif|pjpeg|pjp|apng)$/i.test(f.uri)) {
+          stats.images.size += f.size
+          stats.images.list.push(f.uri)
+        } else if (/\.log$/i.test(f.uri)) {
+          stats.logs.size += f.size
+          stats.logs.list.push(f.uri)
+        } else {
+          stats.others.size += f.size
+          stats.others.list.push(f.uri)
         }
+      }
+      for (const f of logFiles) {
+        if (!f.uri || scUris.has(f.uri)) continue
+        if (/\.log$/i.test(f.uri)) {
+          stats.logs.size += f.size
+          stats.logs.list.push(f.uri)
+        } else {
+          stats.others.size += f.size
+          stats.others.list.push(f.uri)
+        }
+      }
+      this.tmps = [
+        {name: "临时图片", alias: "imgs", size: this.BytesToMB(stats.images.size) + " MB", list: stats.images.list, selected: false},
+        {name: "日志文件", alias: "logs", size: this.BytesToMB(stats.logs.size) + " MB", list: stats.logs.list, selected: false},
+        {name: "缓存内容", alias: "sc", size: this.BytesToMB(stats.savedContent.size) + " MB", list: stats.savedContent.list, selected: false},
+        {name: "其它", alias: "others", size: this.BytesToMB(stats.others.size) + " MB", list: stats.others.list, selected: false}
       ]
     } catch (e) {
-      global.logger.error("在扫描临时文件时出错：", e.toString())
+      this.tmps = []
     }
   },
   onInit() {
